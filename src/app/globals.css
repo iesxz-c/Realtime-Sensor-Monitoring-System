@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #e2e8f0;
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-space-grotesk);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.3);
+  color: #f8fafc;
+}
+
+.animate-rise {
+  animation: rise-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chart-line-flow {
+  animation: line-flow 7.5s ease-in-out infinite alternate;
+}
+
+.chart-area-drift {
+  transform-origin: center bottom;
+  animation: area-drift 8s ease-in-out infinite alternate;
+}
+
+.animate-signal-pulse {
+  animation: signal-pulse 1.45s ease-in-out infinite;
+}
+
+.glass-hover {
+  transition:
+    transform 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.glass-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 24px 70px rgba(2, 8, 25, 0.6);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes line-flow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(148, 163, 184, 0.12));
+  }
+
+  100% {
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.45));
+  }
+}
+
+@keyframes area-drift {
+  0% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.86;
+  }
+
+  100% {
+    transform: translateY(-0.6px) scaleY(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes signal-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.72);
+  }
+
+  70% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+@keyframes orb-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.52;
+  }
+
+  50% {
+    transform: translate3d(10px, -16px, 0) scale(1.08);
+    opacity: 0.78;
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.52;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .chart-line-flow,
+  .chart-area-drift,
+  .animate-signal-pulse {
+    animation: none !important;
+  }
 }
