@@ -3,9 +3,20 @@ create table if not exists public.device_state (
     device_id text not null unique,
     temperature double precision,
     humidity double precision,
-    gas double precision,
+    water_level double precision,
+    ph double precision,
+    light_intensity double precision,
+    noise_level double precision,
+    motion_detected boolean default false,
     updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.device_state add column if not exists water_level double precision;
+alter table public.device_state add column if not exists ph double precision;
+alter table public.device_state add column if not exists light_intensity double precision;
+alter table public.device_state add column if not exists noise_level double precision;
+alter table public.device_state add column if not exists motion_detected boolean default false;
+alter table public.device_state drop column if exists gas;
 create or replace function public.set_device_state_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = timezone('utc', now());
 return new;
 end;

@@ -58,7 +58,11 @@ Columns:
 - `device_id` unique device identifier
 - `temperature` latest temperature
 - `humidity` latest humidity
-- `gas` latest gas reading
+- `water_level` latest water level percentage
+- `ph` latest water pH value
+- `light_intensity` latest light intensity in lux
+- `noise_level` latest noise level in dB
+- `motion_detected` latest motion status
 - `updated_at` last mutation timestamp
 
 Realtime should be enabled for the `device_state` table in Supabase.
@@ -77,7 +81,11 @@ curl -X POST "$SUPABASE_URL/rest/v1/device_state?on_conflict=device_id" \
 		"device_id": "esp32_01",
 		"temperature": 30,
 		"humidity": 70,
-		"gas": 100
+		"water_level": 54,
+		"ph": 7.2,
+		"light_intensity": 440,
+		"noise_level": 48,
+		"motion_detected": false
 	}'
 ```
 
@@ -103,7 +111,11 @@ Body:
 	"device_id": "esp32_01",
 	"temperature": 29.5,
 	"humidity": 64,
-	"gas": 110
+	"water_level": 61,
+	"ph": 7.0,
+	"light_intensity": 510,
+	"noise_level": 46,
+	"motion_detected": true
 }
 ```
 
