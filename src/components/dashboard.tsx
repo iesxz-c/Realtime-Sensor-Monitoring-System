@@ -24,6 +24,69 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
   timeStyle: "medium",
 });
 
+const sanctuaryIssues = [
+  {
+    title: "Shrinking and unstable water spread",
+    detail:
+      "Irregular inflow and seasonal stress reduce wetland quality, nesting confidence, and food availability for migratory birds.",
+  },
+  {
+    title: "Noise and human disturbance",
+    detail:
+      "Road activity, tourism pressure, and unmanaged movement can disrupt feeding and breeding rhythms across sensitive zones.",
+  },
+  {
+    title: "Water quality drift",
+    detail:
+      "Changes in pH, contamination, and stagnant pockets can alter aquatic life and reduce habitat resilience.",
+  },
+  {
+    title: "Climate variability",
+    detail:
+      "Hotter days and longer dry periods shift comfort ranges and stress wetland-dependent species over time.",
+  },
+];
+
+const sanctuarySolutions = [
+  "Use realtime sensor thresholds to trigger field checks before habitat stress becomes visible.",
+  "Protect quiet nesting windows with visitor zoning, noise caps, and better movement control near sensitive areas.",
+  "Stabilize water quality through desilting, inflow management, and regular chemistry review using pH and water-level data.",
+  "Combine on-site telemetry with ranger observations to prioritize habitat restoration where repeated drift is detected.",
+];
+
+const architectureFlowSteps = [
+  {
+    title: "ESP32 sensor node",
+    detail:
+      "The field device reads temperature, humidity, water level, pH, light, noise, and motion from attached sensors.",
+    accent: "bg-rose-400/25",
+  },
+  {
+    title: "Supabase ingestion + realtime",
+    detail:
+      "Sensor payloads are upserted into device_state, then broadcast through Supabase Realtime for immediate UI updates.",
+    accent: "bg-cyan-400/25",
+  },
+  {
+    title: "Next.js analysis surface",
+    detail:
+      "The web app renders live cards, charts, comparisons, and guidance panels for monitoring and presentation.",
+    accent: "bg-emerald-400/25",
+  },
+];
+
+const keyOutcomes = [
+  "Realtime monitoring of seven environmental signals in one interface.",
+  "Visual evidence for habitat stress using charts, recent rows, and guidance targets.",
+  "Cloud-ready architecture that works even before final hardware deployment through a simulator.",
+];
+
+const futureScope = [
+  "Add alerting by SMS or email when thresholds are crossed for long periods.",
+  "Store multi-device history for zone-level comparison across the sanctuary.",
+  "Layer camera or ranger observations on top of sensor drift for stronger ecological analysis.",
+];
+
 function isFiniteNumber(value: number | null): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
@@ -277,6 +340,140 @@ function HeroSection({
   );
 }
 
+function SectionIntro({
+  eyebrow,
+  title,
+  description,
+  anchor,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  anchor?: string;
+}) {
+  return (
+    <div id={anchor} className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p className="text-xs uppercase tracking-[0.26em] text-cyan-200/80">{eyebrow}</p>
+        <h2 className="mt-2 text-3xl font-semibold text-white md:text-4xl">{title}</h2>
+      </div>
+      <p className="max-w-2xl text-sm leading-7 text-slate-300/80 md:text-base">{description}</p>
+    </div>
+  );
+}
+
+function ArchitectureShowcase() {
+  return (
+    <article className="glass-hover rounded-[1.75rem] border border-sky-300/15 bg-[linear-gradient(180deg,rgba(6,18,39,0.94),rgba(4,10,24,0.98))] p-5 shadow-[0_30px_80px_rgba(2,8,23,0.35)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] text-sky-200/70">Architecture flow section</p>
+          <h3 className="mt-2 text-2xl font-semibold text-white">ESP32 to Supabase to Next.js pipeline</h3>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300/80">
+            A presentation-friendly summary of how field telemetry is captured, stored, broadcast, and visualized for sanctuary monitoring.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Core stack</p>
+          <p className="mt-1 text-lg font-semibold text-white">ESP32, Supabase, Next.js</p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-3">
+        {architectureFlowSteps.map((step, index) => (
+          <div key={step.title} className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+            <div className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${step.accent}`} />
+            <p className="relative text-xs uppercase tracking-[0.22em] text-slate-400">Step {index + 1}</p>
+            <h4 className="relative mt-3 text-xl font-semibold text-white">{step.title}</h4>
+            <p className="relative mt-3 text-sm leading-6 text-slate-300/80">{step.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-[#041121] p-5">
+        <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/75">Pipeline diagram</p>
+        <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-center">
+          <div className="rounded-2xl border border-rose-300/20 bg-rose-300/10 p-4 text-center">
+            <p className="text-sm font-medium text-rose-100">ESP32 + sensors</p>
+            <p className="mt-1 text-xs text-slate-300">Reads field telemetry</p>
+          </div>
+          <div className="text-center text-2xl text-slate-500">→</div>
+          <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-center">
+            <p className="text-sm font-medium text-cyan-100">Supabase REST + Realtime</p>
+            <p className="mt-1 text-xs text-slate-300">Stores rows and broadcasts updates</p>
+          </div>
+          <div className="text-center text-2xl text-slate-500">→</div>
+          <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-center">
+            <p className="text-sm font-medium text-emerald-100">Next.js dashboard</p>
+            <p className="mt-1 text-xs text-slate-300">Renders charts, guidance, and reports</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4 xl:grid-cols-2">
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+          <p className="text-xs uppercase tracking-[0.24em] text-amber-200/75">Key outcomes</p>
+          <div className="mt-4 grid gap-3">
+            {keyOutcomes.map((outcome) => (
+              <div key={outcome} className="rounded-2xl border border-white/10 bg-black/15 p-4 text-sm leading-6 text-slate-200/90">
+                {outcome}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+          <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/75">Future scope</p>
+          <div className="mt-4 grid gap-3">
+            {futureScope.map((item) => (
+              <div key={item} className="rounded-2xl border border-white/10 bg-black/15 p-4 text-sm leading-6 text-slate-200/90">
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function SanctuaryFooter() {
+  return (
+    <footer className="mt-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,14,31,0.96),rgba(3,10,22,0.98))] p-6 md:p-8">
+      <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] text-amber-200/75">Sanctuary outlook</p>
+          <h2 className="mt-3 text-3xl font-semibold text-white md:text-4xl">
+            Current issues in Vedanthangal Bird Sanctuary and how this system can help
+          </h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {sanctuaryIssues.map((issue) => (
+              <article key={issue.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-lg font-medium text-white">{issue.title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300/80">{issue.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="rounded-[1.75rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(8,26,25,0.86),rgba(4,14,20,0.96))] p-5">
+            <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/70">Response ideas</p>
+            <h3 className="mt-2 text-2xl font-semibold text-white">How to solve and act faster</h3>
+            <div className="mt-4 grid gap-3">
+              {sanctuarySolutions.map((solution) => (
+                <div key={solution} className="rounded-2xl border border-white/10 bg-black/15 p-4 text-sm leading-6 text-slate-200/90">
+                  {solution}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 function ChartPanel({
   title,
   subtitle,
@@ -347,11 +544,14 @@ function ChartPanel({
               formatter={(value) => [value, dataKey]}
             />
             <Line
-              type="monotone"
+              type="natural"
               dataKey={dataKey}
               stroke={stroke}
               strokeWidth={3}
               dot={false}
+              isAnimationActive
+              animationDuration={950}
+              animationEasing="ease-out"
               activeDot={{ r: 5, fill: stroke, stroke: "#0f172a", strokeWidth: 2 }}
               className="chart-line-flow"
             />
@@ -422,6 +622,9 @@ function MotionPanel({ data, delay }: { data: ChartPoint[]; delay?: string }) {
               stroke="#38bdf8"
               strokeWidth={3}
               dot={false}
+              isAnimationActive
+              animationDuration={850}
+              animationEasing="ease-out"
               activeDot={{ r: 5, fill: "#38bdf8", stroke: "#0f172a", strokeWidth: 2 }}
               className="chart-line-flow"
             />
@@ -525,12 +728,15 @@ function SelectableMultiPlot({
               .map((option) => (
                 <Line
                   key={option.key}
-                  type={option.chartType ?? "monotone"}
+                  type={option.chartType ?? "natural"}
                   dataKey={option.key}
                   stroke={option.stroke}
                   strokeWidth={3}
                   dot={false}
                   strokeDasharray={option.key === "motion_score" ? "5 4" : undefined}
+                  isAnimationActive
+                  animationDuration={950}
+                  animationEasing="ease-out"
                   activeDot={{ r: 5, fill: option.stroke, stroke: "#0f172a", strokeWidth: 2 }}
                   className="chart-line-flow"
                 />
@@ -543,61 +749,98 @@ function SelectableMultiPlot({
 }
 
 function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
-  return (
-    <article className="animate-rise glass-hover rounded-2xl border border-white/10 bg-[linear-gradient(170deg,rgba(5,16,35,0.92),rgba(4,10,24,0.94))] p-5" style={{ animationDelay: "0.35s" }}>
+  type TrendMetricKey =
+    | "temperature_trend"
+    | "humidity_trend"
+    | "water_level_trend"
+    | "ph_trend"
+    | "light_intensity_trend"
+    | "noise_level_trend"
+    | "motion_trend";
+
+  const [focusedMetric, setFocusedMetric] = useState<TrendMetricKey | null>(null);
+
+  const trendSeries: Array<{
+    key: TrendMetricKey;
+    label: string;
+    stroke: string;
+    type: "monotone" | "stepAfter";
+  }> = [
+    { key: "temperature_trend", label: "Temperature", stroke: "#fb7185", type: "monotone" as const },
+    { key: "humidity_trend", label: "Humidity", stroke: "#22d3ee", type: "monotone" as const },
+    { key: "water_level_trend", label: "Water", stroke: "#60a5fa", type: "monotone" as const },
+    { key: "ph_trend", label: "pH", stroke: "#4ade80", type: "monotone" as const },
+    { key: "light_intensity_trend", label: "Light", stroke: "#fcd34d", type: "monotone" as const },
+    { key: "noise_level_trend", label: "Noise", stroke: "#c4b5fd", type: "monotone" as const },
+    { key: "motion_trend", label: "Motion", stroke: "#7dd3fc", type: "stepAfter" as const },
+  ];
+
+  const climateSeries = trendSeries.filter((series) =>
+    ["temperature_trend", "humidity_trend", "water_level_trend", "ph_trend"].includes(series.key),
+  );
+
+  const disturbanceSeries = trendSeries.filter((series) =>
+    ["light_intensity_trend", "noise_level_trend", "motion_trend"].includes(series.key),
+  );
+
+  const labelMap: Record<string, string> = {
+    temperature_trend: "Temperature",
+    humidity_trend: "Humidity",
+    water_level_trend: "Water Level",
+    ph_trend: "pH",
+    light_intensity_trend: "Light",
+    noise_level_trend: "Noise",
+    motion_trend: "Motion",
+  };
+
+  const renderBand = ({
+    title,
+    subtitle,
+    series,
+    minHeight,
+  }: {
+    title: string;
+    subtitle: string;
+    series: Array<{
+      key: TrendMetricKey;
+      label: string;
+      stroke: string;
+      type: "monotone" | "stepAfter";
+    }>;
+    minHeight: number;
+  }) => (
+    <div className="rounded-[1.35rem] border border-white/8 bg-[linear-gradient(180deg,rgba(4,11,24,0.76),rgba(3,9,19,0.92))] p-4">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-300/80">Ecosystem trend (combined)</p>
-          <p className="text-2xl font-semibold text-white">All-sensor trend index with motion pulses</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-400">{title}</p>
+          <p className="mt-1 text-xl font-semibold text-white">{subtitle}</p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-300/80">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-            Temperature
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-cyan-400" />
-            Humidity
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-blue-400" />
-            Water
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            pH
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-            Light
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-violet-300" />
-            Noise
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-sky-300" />
-            Motion
-          </span>
-        </div>
+        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Shared timeline</p>
       </div>
 
-      <div className="h-107.5">
-        <ResponsiveContainer width="100%" height="100%" minWidth={320} minHeight={300}>
-          <LineChart data={data} margin={{ top: 12, right: 12, left: -16, bottom: 6 }}>
+      <div className="h-90 md:h-96">
+        <ResponsiveContainer width="100%" height="100%" minWidth={320} minHeight={minHeight}>
+          <LineChart syncId="ecosystem-trend" data={data} margin={{ top: 12, right: 12, left: -12, bottom: 6 }}>
             <CartesianGrid stroke="rgba(148,163,184,0.14)" strokeDasharray="4 6" vertical={false} />
             <XAxis
               dataKey="time"
               tick={{ fill: "#94a3b8", fontSize: 12 }}
               axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
               tickLine={false}
+              minTickGap={28}
             />
             <YAxis
               tick={{ fill: "#94a3b8", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
               domain={[0, 100]}
+              width={44}
+              label={{
+                value: "Trend index",
+                angle: -90,
+                position: "insideLeft",
+                style: { fill: "#94a3b8", fontSize: 12 },
+              }}
             />
             <Tooltip
               cursor={{ stroke: "rgba(148,163,184,0.45)", strokeWidth: 1 }}
@@ -613,77 +856,91 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
               }}
               formatter={(value, name) => {
                 if (name === "motion_trend") {
-                  return [Number(value) >= 50 ? "Detected" : "Clear", "motion"];
+                  return [Number(value) >= 50 ? "Detected" : "Clear", "Motion"];
                 }
-                return [`${Number(value).toFixed(0)}%`, String(name).replace("_trend", "")];
+
+                return [`${Number(value).toFixed(0)}%`, labelMap[String(name)] ?? String(name)];
               }}
             />
-            <Line
-              type="monotone"
-              dataKey="temperature_trend"
-              stroke="#fb7185"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#fb7185", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="monotone"
-              dataKey="humidity_trend"
-              stroke="#22d3ee"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#22d3ee", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="monotone"
-              dataKey="water_level_trend"
-              stroke="#60a5fa"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#60a5fa", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="monotone"
-              dataKey="ph_trend"
-              stroke="#4ade80"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#4ade80", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="monotone"
-              dataKey="light_intensity_trend"
-              stroke="#fcd34d"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#fcd34d", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="monotone"
-              dataKey="noise_level_trend"
-              stroke="#c4b5fd"
-              strokeWidth={2.8}
-              dot={false}
-              activeDot={{ r: 5, fill: "#c4b5fd", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
-            <Line
-              type="stepAfter"
-              dataKey="motion_trend"
-              stroke="#7dd3fc"
-              strokeWidth={3.2}
-              dot={false}
-              strokeDasharray="5 4"
-              activeDot={{ r: 5, fill: "#7dd3fc", stroke: "#0f172a", strokeWidth: 2 }}
-              className="chart-line-flow"
-            />
+            {series.map((item) => {
+              const active = !focusedMetric || focusedMetric === item.key;
+
+              return (
+                <Line
+                  key={item.key}
+                  type={item.type === "monotone" ? "natural" : item.type}
+                  dataKey={item.key}
+                  stroke={item.stroke}
+                  strokeWidth={active ? (item.key === "motion_trend" ? 3.8 : 3.2) : 1.8}
+                  strokeOpacity={active ? 1 : 0.18}
+                  dot={false}
+                  connectNulls
+                  strokeLinecap="round"
+                  strokeDasharray={item.key === "motion_trend" ? "6 4" : undefined}
+                  isAnimationActive
+                  animationDuration={1000}
+                  animationEasing="ease-out"
+                  activeDot={{ r: 5, fill: item.stroke, stroke: "#0f172a", strokeWidth: 2 }}
+                  className={active ? "chart-line-flow" : undefined}
+                />
+              );
+            })}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+    </div>
+  );
+
+  return (
+    <article className="animate-rise glass-hover rounded-2xl border border-white/10 bg-[linear-gradient(170deg,rgba(5,16,35,0.92),rgba(4,10,24,0.94))] p-5" style={{ animationDelay: "0.35s" }}>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm text-slate-300/80">Ecosystem trend (combined)</p>
+          <p className="text-2xl font-semibold text-white">All-sensor trend index with motion pulses</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+            Hover a metric chip to isolate it. Every line is normalized to a 0-100 habitat trend index so different units stay readable on one chart.
+          </p>
+        </div>
+
+        <div className="flex max-w-3xl flex-wrap items-center justify-end gap-2 text-xs uppercase tracking-[0.18em] text-slate-300/80">
+          {trendSeries.map((series) => {
+            const active = !focusedMetric || focusedMetric === series.key;
+
+            return (
+              <button
+                key={series.key}
+                type="button"
+                onMouseEnter={() => setFocusedMetric(series.key)}
+                onMouseLeave={() => setFocusedMetric(null)}
+                onFocus={() => setFocusedMetric(series.key)}
+                onBlur={() => setFocusedMetric(null)}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
+                  active
+                    ? "border-white/15 bg-white/6 text-slate-100"
+                    : "border-white/8 bg-transparent text-slate-500"
+                }`}
+              >
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: series.stroke }} />
+                {series.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {renderBand({
+          title: "Climate and chemistry",
+          subtitle: "Temperature, humidity, water level, and pH",
+          series: climateSeries,
+          minHeight: 360,
+        })}
+        {renderBand({
+          title: "Disturbance and light/activity",
+          subtitle: "Light intensity, noise, and motion pulses",
+          series: disturbanceSeries,
+          minHeight: 340,
+        })}
       </div>
     </article>
   );
@@ -736,11 +993,17 @@ function SanctuaryPanel({
   humidity,
   ph,
   waterLevel,
+  lightIntensity,
+  noiseLevel,
+  motionDetected,
 }: {
   temperature: number | null;
   humidity: number | null;
   ph: number | null;
   waterLevel: number | null;
+  lightIntensity: number | null;
+  noiseLevel: number | null;
+  motionDetected: boolean | null;
 }) {
   const rangeProgress = (
     value: number | null,
@@ -761,6 +1024,17 @@ function SanctuaryPanel({
   const temperatureBand = rangeProgress(temperature, 24, 32);
   const phBand = rangeProgress(ph, 6.5, 8.0);
   const waterBand = rangeProgress(waterLevel, 35, 80);
+  const lightBand = rangeProgress(lightIntensity, 250, 700);
+  const noiseBand = rangeProgress(noiseLevel, 20, 55);
+  const motionBand =
+    motionDetected === null
+      ? { progress: 0, state: "warn" as const, text: "--", ideal: "low disturbance" }
+      : {
+          progress: motionDetected ? 100 : 28,
+          state: motionDetected ? ("warn" as const) : ("good" as const),
+          text: motionDetected ? "Detected" : "Quiet",
+          ideal: "quiet habitat",
+        };
 
   return (
     <article className="animate-rise glass-hover rounded-2xl border border-emerald-300/20 bg-[linear-gradient(165deg,rgba(4,26,31,0.84),rgba(3,14,23,0.94))] p-5" style={{ animationDelay: "0.3s" }}>
@@ -802,6 +1076,30 @@ function SanctuaryPanel({
           unit=""
           progress={phBand.progress}
           state={phBand.state}
+        />
+        <SanctuaryBand
+          label="Light"
+          current={lightBand.text}
+          ideal="250 - 700"
+          unit="lx"
+          progress={lightBand.progress}
+          state={lightBand.state}
+        />
+        <SanctuaryBand
+          label="Noise"
+          current={noiseBand.text}
+          ideal="20 - 55"
+          unit="dB"
+          progress={noiseBand.progress}
+          state={noiseBand.state}
+        />
+        <SanctuaryBand
+          label="Motion"
+          current={motionBand.text}
+          ideal={motionBand.ideal}
+          unit=""
+          progress={motionBand.progress}
+          state={motionBand.state}
         />
       </div>
     </article>
@@ -953,6 +1251,7 @@ export default function Dashboard() {
     const shortTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
       hour12: true,
     });
 
@@ -1049,7 +1348,15 @@ export default function Dashboard() {
             motionDetected={deviceState?.motion_detected ?? null}
           />
 
-          <section className="mt-6 grid gap-4 xl:grid-cols-2">
+          <section className="mt-8">
+            <SectionIntro
+              anchor="graphs"
+              eyebrow="Graphs section"
+              title="Live sensor graphs"
+              description="Dedicated trend panels for each live environmental stream, so one signal can be inspected clearly before you compare it with the others."
+            />
+
+            <div className="grid gap-4 xl:grid-cols-2">
             <ChartPanel
               title="Temperature (24h)"
               subtitle="Realtime and historical"
@@ -1109,15 +1416,17 @@ export default function Dashboard() {
               delay="0.38s"
             />
             <MotionPanel data={chartData} delay="0.4s" />
-            <SanctuaryPanel
-              temperature={deviceState?.temperature ?? null}
-              humidity={deviceState?.humidity ?? null}
-              ph={deviceState?.ph ?? null}
-              waterLevel={deviceState?.water_level ?? null}
-            />
+            </div>
           </section>
 
-          <section className="mt-6">
+          <section className="mt-8">
+            <SectionIntro
+              anchor="custom-graphs"
+              eyebrow="Custom graphs section"
+              title="Build your own sensor comparison"
+              description="Select any combination of the seven telemetry streams and generate a focused multi-line comparison view on demand."
+            />
+
             <SelectableMultiPlot
               data={chartData}
               selectedMetrics={selectedMetrics}
@@ -1125,11 +1434,48 @@ export default function Dashboard() {
             />
           </section>
 
-          <section className="mt-6">
+          <section className="mt-8">
+            <SectionIntro
+              anchor="ecosystem-trend"
+              eyebrow="Ecosystem trend (combined)"
+              title="All-sensor trend index with motion pulses"
+              description="A normalized overview that lets every metric share the same canvas, with motion visualized as an activity pulse instead of a flat boolean."
+            />
+
             <MultiSeriesPanel data={chartData} />
           </section>
 
-          <section className="animate-rise glass-hover mt-6 rounded-2xl border border-white/10 bg-[linear-gradient(170deg,rgba(5,16,35,0.92),rgba(4,10,24,0.94))] p-5" style={{ animationDelay: "0.42s" }}>
+          <section className="mt-8">
+            <SectionIntro
+              anchor="guidance"
+              eyebrow="Vedanthangal sanctuary guidance"
+              title="Ideal habitat vs current"
+              description="Baseline comfort targets for wetland bird-friendly ambient conditions, paired with a presentation-friendly architecture and future-scope summary."
+            />
+
+            <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+              <SanctuaryPanel
+                temperature={deviceState?.temperature ?? null}
+                humidity={deviceState?.humidity ?? null}
+                ph={deviceState?.ph ?? null}
+                waterLevel={deviceState?.water_level ?? null}
+                lightIntensity={deviceState?.light_intensity ?? null}
+                noiseLevel={deviceState?.noise_level ?? null}
+                motionDetected={deviceState?.motion_detected ?? null}
+              />
+              <ArchitectureShowcase />
+            </div>
+          </section>
+
+          <section className="mt-8">
+            <SectionIntro
+              anchor="recent-readings"
+              eyebrow="Recent readings"
+              title="Latest 10 sensor rows"
+              description="A compact operational table for quick number-level verification after exploring the trend panels and combined plots above."
+            />
+
+            <div className="animate-rise glass-hover rounded-2xl border border-white/10 bg-[linear-gradient(170deg,rgba(5,16,35,0.92),rgba(4,10,24,0.94))] p-5" style={{ animationDelay: "0.42s" }}>
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-300/80">Recent readings</p>
@@ -1168,6 +1514,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
+            </div>
           </section>
 
           {!hasSupabaseConfig ? (
@@ -1181,6 +1528,8 @@ export default function Dashboard() {
               {error}
             </div>
           ) : null}
+
+          <SanctuaryFooter />
         </section>
       </div>
     </main>
