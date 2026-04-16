@@ -54,7 +54,9 @@ a {
 }
 
 .chart-line-flow {
-  animation: line-flow 7.5s ease-in-out infinite alternate;
+  opacity: 0.98;
+  transition: opacity 220ms ease;
+  will-change: opacity;
 }
 
 .chart-area-drift {
@@ -88,16 +90,6 @@ a {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes line-flow {
-  0% {
-    filter: drop-shadow(0 0 2px rgba(148, 163, 184, 0.12));
-  }
-
-  100% {
-    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.45));
   }
 }
 

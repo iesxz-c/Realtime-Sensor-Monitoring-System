@@ -185,6 +185,11 @@ type ChartPoint = {
   motion_trend: number;
 };
 
+type NoiseHistoryPoint = {
+  recordedAt: string;
+  noise: number;
+};
+
 type SensorMetricKey =
   | "temperature"
   | "humidity"
@@ -477,6 +482,7 @@ function ChartPanel({
   stroke,
   domain,
   delay,
+  animated = true,
 }: {
   title: string;
   subtitle: string;
@@ -493,6 +499,7 @@ function ChartPanel({
   stroke: string;
   domain?: [number, number];
   delay?: string;
+  animated?: boolean;
 }) {
   return (
     <article
@@ -543,9 +550,9 @@ function ChartPanel({
               stroke={stroke}
               strokeWidth={3}
               dot={false}
-              isAnimationActive
-              animationDuration={950}
-              animationEasing="ease-out"
+              isAnimationActive={animated}
+              animationDuration={620}
+              animationEasing="ease-in-out"
               activeDot={{ r: 5, fill: stroke, stroke: "#0f172a", strokeWidth: 2 }}
               className="chart-line-flow"
             />
@@ -1125,6 +1132,7 @@ function SetupPanel() {
 export default function Dashboard() {
   const [deviceState, setDeviceState] = useState<DeviceStateRow | null>(null);
   const [history, setHistory] = useState<SensorHistoryPoint[]>([]);
+  const [noiseHistory, setNoiseHistory] = useState<NoiseHistoryPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [microphoneNoiseLevel, setMicrophoneNoiseLevel] = useState(0);
@@ -1155,8 +1163,11 @@ export default function Dashboard() {
   // Microphone noise capture using time-domain analysis
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let sourceNode: MediaStreamAudioSourceNode | null = null;
     let processor: ScriptProcessorNode | null = null;
     let audioContext: AudioContext | null = null;
+    let smoothedNoise = 0;
+    let lastCommitAt = 0;
 
     const initMicrophone = async () => {
       try {
@@ -1184,13 +1195,25 @@ export default function Dashboard() {
           await audioContext.resume();
         }
 
-        // Create source - use proper method call
-        const source = audioContext.createMediaStreamSource(stream);
+        // Create source with compatibility fallback.
+        const ctxAny = audioContext as any;
+        const createSourceFn =
+          typeof ctxAny.createMediaStreamSource === "function"
+            ? ctxAny.createMediaStreamSource.bind(audioContext)
+            : typeof ctxAny.createMediaStreamAudioSource === "function"
+              ? ctxAny.createMediaStreamAudioSource.bind(audioContext)
+              : null;
+
+        if (!createSourceFn) {
+          throw new Error("AudioContext does not support MediaStream source creation");
+        }
+
+        sourceNode = createSourceFn(stream) as MediaStreamAudioSourceNode;
 
         // Create script processor for real-time analysis
         processor = audioContext.createScriptProcessor(4096, 1, 1);
 
-        source.connect(processor);
+        sourceNode.connect(processor);
         processor.connect(audioContext.destination);
 
         processor.onaudioprocess = (event) => {
@@ -1206,12 +1229,19 @@ export default function Dashboard() {
           // Scale to 0-100 dB range with aggressive scaling
           const normalizedValue = Math.min(100, rms * 2000);
 
-          setMicrophoneNoiseLevel(Number(normalizedValue.toFixed(1)));
+          // Smooth and throttle updates so charts do not rerender every audio callback.
+          smoothedNoise = smoothedNoise * 0.82 + normalizedValue * 0.18;
+          const nowMs = performance.now();
 
-          // Log for debugging
-          console.log(
-            `🔊 RMS: ${(rms * 1000).toFixed(2)}, Noise dB: ${normalizedValue.toFixed(1)}`,
-          );
+          if (nowMs - lastCommitAt >= 90) {
+            const nextNoise = Number(smoothedNoise.toFixed(1));
+            setMicrophoneNoiseLevel(nextNoise);
+            setNoiseHistory((current) => {
+              const next = [...current, { recordedAt: new Date().toISOString(), noise: nextNoise }];
+              return next.slice(-18);
+            });
+            lastCommitAt = nowMs;
+          }
         };
 
         console.log("📊 Audio processor connected and listening...");
@@ -1233,6 +1263,9 @@ export default function Dashboard() {
       console.log("🛑 Cleaning up microphone...");
       if (processor) {
         processor.disconnect();
+      }
+      if (sourceNode) {
+        sourceNode.disconnect();
       }
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -1354,7 +1387,7 @@ export default function Dashboard() {
         rain_sensor: Number(point.rain_sensor.toFixed(1)),
         ph: Number(point.ph.toFixed(2)),
         air_quality: Number(point.air_quality.toFixed(0)),
-        noise_level: microphoneNoiseLevel,
+        noise_level: 0,
         motion_detected: point.motion_detected,
         motion_score: point.motion_detected ? 100 : 0,
         temperature_trend: 0,
@@ -1404,7 +1437,49 @@ export default function Dashboard() {
       noise_level_trend: normalizeNoise(item.noise_level),
       motion_trend: item.motion_score,
     }));
-  }, [history, microphoneNoiseLevel]);
+  }, [history]);
+
+  const noiseChartData = useMemo<ChartPoint[]>(() => {
+    const shortTime = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+
+    const fullDateTime = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+
+    return noiseHistory.map((point) => {
+      const date = new Date(point.recordedAt);
+
+      return {
+        time: shortTime.format(date),
+        fullTime: fullDateTime.format(date),
+        temperature: 0,
+        humidity: 0,
+        rain_sensor: 0,
+        ph: 0,
+        air_quality: 0,
+        noise_level: point.noise,
+        motion_detected: false,
+        motion_score: 0,
+        temperature_trend: 0,
+        humidity_trend: 0,
+        rain_sensor_trend: 0,
+        ph_trend: 0,
+        air_quality_trend: 0,
+        noise_level_trend: point.noise,
+        motion_trend: 0,
+      };
+    });
+  }, [noiseHistory]);
 
   const recentReadings = useMemo(() => {
     return chartData.slice(-10).reverse();
@@ -1490,10 +1565,12 @@ export default function Dashboard() {
                 title="Microphone Noise (24h)"
                 subtitle="Realtime audio from device microphone"
                 unit="dB"
-                data={chartData}
+                data={noiseChartData}
                 dataKey="noise_level"
                 stroke="#c4b5fd"
+                domain={[0, 100]}
                 delay="0.38s"
+                animated={false}
               />
               <MotionPanel data={chartData} delay="0.4s" />
             </div>
@@ -1554,7 +1631,6 @@ export default function Dashboard() {
               title="Latest 10 sensor rows"
               description="A compact operational table for quick number-level verification after exploring the trend panels and combined plots above."
             />
-
             <div className="animate-rise glass-hover rounded-2xl border border-white/10 bg-[linear-gradient(170deg,rgba(5,16,35,0.92),rgba(4,10,24,0.94))] p-5" style={{ animationDelay: "0.42s" }}>
               <div className="mb-4 flex items-center justify-between">
                 <div>
