@@ -60,7 +60,7 @@ Columns:
 - `humidity` latest humidity
 - `water_level` latest water level percentage
 - `ph` latest water pH value
-- `light_intensity` latest light intensity in lux
+- `air_quality` latest air quality index
 - `noise_level` latest noise level in dB
 - `motion_detected` latest motion status
 - `updated_at` last mutation timestamp
@@ -83,7 +83,7 @@ curl -X POST "$SUPABASE_URL/rest/v1/device_state?on_conflict=device_id" \
 		"humidity": 70,
 		"water_level": 54,
 		"ph": 7.2,
-		"light_intensity": 440,
+		"air_quality": 67,
 		"noise_level": 48,
 		"motion_detected": false
 	}'
@@ -113,7 +113,7 @@ Body:
 	"humidity": 64,
 	"water_level": 61,
 	"ph": 7.0,
-	"light_intensity": 510,
+	"air_quality": 58,
 	"noise_level": 46,
 	"motion_detected": true
 }
