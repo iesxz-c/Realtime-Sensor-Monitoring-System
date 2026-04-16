@@ -58,7 +58,7 @@ const architectureFlowSteps = [
   {
     title: "ESP32 sensor node",
     detail:
-      "The field device reads temperature, humidity, water level, pH, light, noise, and motion from attached sensors.",
+      "The field device reads temperature, humidity, rain detection, pH, air quality, and motion from attached sensors. Noise is captured from the laptop microphone.",
     accent: "bg-rose-400/25",
   },
   {
@@ -94,19 +94,17 @@ function isFiniteNumber(value: number | null): value is number {
 function buildHistoryPoint(row: DeviceStateRow): SensorHistoryPoint | null {
   const temperature = row.temperature;
   const humidity = row.humidity;
-  const waterLevel = row.water_level;
+  const rainSensor = row.rain_sensor;
   const ph = row.ph;
   const airQuality = row.air_quality;
-  const noiseLevel = row.noise_level;
   const motionDetected = row.motion_detected;
 
   if (
     !isFiniteNumber(temperature) ||
     !isFiniteNumber(humidity) ||
-    !isFiniteNumber(waterLevel) ||
+    !isFiniteNumber(rainSensor) ||
     !isFiniteNumber(ph) ||
     !isFiniteNumber(airQuality) ||
-    !isFiniteNumber(noiseLevel) ||
     typeof motionDetected !== "boolean"
   ) {
     return null;
@@ -116,10 +114,9 @@ function buildHistoryPoint(row: DeviceStateRow): SensorHistoryPoint | null {
     recordedAt: row.updated_at,
     temperature,
     humidity,
-    water_level: waterLevel,
+    rain_sensor: rainSensor,
     ph,
     air_quality: airQuality,
-    noise_level: noiseLevel,
     motion_detected: motionDetected,
   };
 }
@@ -173,7 +170,7 @@ type ChartPoint = {
   fullTime: string;
   temperature: number;
   humidity: number;
-  water_level: number;
+  rain_sensor: number;
   ph: number;
   air_quality: number;
   noise_level: number;
@@ -181,7 +178,7 @@ type ChartPoint = {
   motion_score: number;
   temperature_trend: number;
   humidity_trend: number;
-  water_level_trend: number;
+  rain_sensor_trend: number;
   ph_trend: number;
   air_quality_trend: number;
   noise_level_trend: number;
@@ -191,10 +188,9 @@ type ChartPoint = {
 type SensorMetricKey =
   | "temperature"
   | "humidity"
-  | "water_level"
+  | "rain_sensor"
   | "ph"
   | "air_quality"
-  | "noise_level"
   | "motion_score";
 
 const sensorMetricOptions: Array<{
@@ -206,10 +202,9 @@ const sensorMetricOptions: Array<{
 }> = [
   { key: "temperature", label: "Temperature", stroke: "#fb7185", unit: "C" },
   { key: "humidity", label: "Humidity", stroke: "#22d3ee", unit: "%" },
-  { key: "water_level", label: "Water Level", stroke: "#60a5fa", unit: "%" },
+  { key: "rain_sensor", label: "Rain Sensor", stroke: "#3b82f6", unit: "mm" },
   { key: "ph", label: "pH", stroke: "#4ade80", unit: "pH" },
   { key: "air_quality", label: "Air Quality", stroke: "#fcd34d", unit: "AQI" },
-  { key: "noise_level", label: "Noise", stroke: "#c4b5fd", unit: "dB" },
   {
     key: "motion_score",
     label: "Motion",
@@ -244,10 +239,10 @@ function HeroSection({
   offlineThresholdSeconds,
   temperature,
   humidity,
-  waterLevel,
+  rainSensor,
   ph,
   airQuality,
-  noiseLevel,
+  microphoneNoiseLevel,
   motionDetected,
 }: {
   deviceId: string;
@@ -256,10 +251,10 @@ function HeroSection({
   offlineThresholdSeconds: number;
   temperature: string;
   humidity: string;
-  waterLevel: string;
+  rainSensor: string;
   ph: string;
   airQuality: string;
-  noiseLevel: string;
+  microphoneNoiseLevel: string;
   motionDetected: boolean | null;
 }) {
   return (
@@ -275,8 +270,7 @@ function HeroSection({
             Vedanthangal Ecosystem Monitoring
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
-            A live habitat command surface for temperature, humidity, water level, pH, light,
-            noise, and motion, streamed from the field into a realtime dashboard.
+            A live habitat command surface for temperature, humidity, rain detection, pH, air quality, microphone-captured noise, and motion, streamed from the field into a realtime dashboard.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3 text-sm">
@@ -294,10 +288,10 @@ function HeroSection({
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <HeroMetric label="Temperature" value={temperature} accentClass="bg-rose-400/25" />
             <HeroMetric label="Humidity" value={humidity} accentClass="bg-cyan-400/25" />
-            <HeroMetric label="Water Level" value={waterLevel} accentClass="bg-blue-400/25" />
+            <HeroMetric label="Rain Sensor" value={rainSensor} accentClass="bg-blue-400/25" />
             <HeroMetric label="pH" value={ph} accentClass="bg-emerald-400/25" />
             <HeroMetric label="Air Quality" value={airQuality} accentClass="bg-amber-300/25" />
-            <HeroMetric label="Noise Level" value={noiseLevel} accentClass="bg-violet-300/25" />
+            <HeroMetric label="Microphone Noise" value={microphoneNoiseLevel} accentClass="bg-violet-300/25" />
           </div>
         </div>
 
@@ -491,7 +485,7 @@ function ChartPanel({
   dataKey:
     | "temperature"
     | "humidity"
-    | "water_level"
+    | "rain_sensor"
     | "ph"
     | "air_quality"
     | "noise_level"
@@ -752,7 +746,7 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
   type TrendMetricKey =
     | "temperature_trend"
     | "humidity_trend"
-    | "water_level_trend"
+    | "rain_sensor_trend"
     | "ph_trend"
     | "air_quality_trend"
     | "noise_level_trend"
@@ -768,15 +762,15 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
   }> = [
     { key: "temperature_trend", label: "Temperature", stroke: "#fb7185", type: "monotone" as const },
     { key: "humidity_trend", label: "Humidity", stroke: "#22d3ee", type: "monotone" as const },
-    { key: "water_level_trend", label: "Water", stroke: "#60a5fa", type: "monotone" as const },
+    { key: "rain_sensor_trend", label: "Rain Sensor", stroke: "#60a5fa", type: "monotone" as const },
     { key: "ph_trend", label: "pH", stroke: "#4ade80", type: "monotone" as const },
     { key: "air_quality_trend", label: "Air Quality", stroke: "#fcd34d", type: "monotone" as const },
-    { key: "noise_level_trend", label: "Noise", stroke: "#c4b5fd", type: "monotone" as const },
+    { key: "noise_level_trend", label: "Microphone Noise", stroke: "#c4b5fd", type: "monotone" as const },
     { key: "motion_trend", label: "Motion", stroke: "#7dd3fc", type: "stepAfter" as const },
   ];
 
   const climateSeries = trendSeries.filter((series) =>
-    ["temperature_trend", "humidity_trend", "water_level_trend", "ph_trend"].includes(series.key),
+    ["temperature_trend", "humidity_trend", "rain_sensor_trend", "ph_trend"].includes(series.key),
   );
 
   const disturbanceSeries = trendSeries.filter((series) =>
@@ -786,10 +780,10 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
   const labelMap: Record<string, string> = {
     temperature_trend: "Temperature",
     humidity_trend: "Humidity",
-    water_level_trend: "Water Level",
+    rain_sensor_trend: "Rain Sensor",
     ph_trend: "pH",
     air_quality_trend: "Air Quality",
-    noise_level_trend: "Noise",
+    noise_level_trend: "Microphone Noise",
     motion_trend: "Motion",
   };
 
@@ -992,17 +986,17 @@ function SanctuaryPanel({
   temperature,
   humidity,
   ph,
-  waterLevel,
+  rainSensor,
   airQuality,
-  noiseLevel,
+  microphoneNoiseLevel,
   motionDetected,
 }: {
   temperature: number | null;
   humidity: number | null;
   ph: number | null;
-  waterLevel: number | null;
+  rainSensor: number | null;
   airQuality: number | null;
-  noiseLevel: number | null;
+  microphoneNoiseLevel: number | null;
   motionDetected: boolean | null;
 }) {
   const rangeProgress = (
@@ -1023,9 +1017,8 @@ function SanctuaryPanel({
   const humidityBand = rangeProgress(humidity, 55, 75);
   const temperatureBand = rangeProgress(temperature, 24, 32);
   const phBand = rangeProgress(ph, 6.5, 8.0);
-  const waterBand = rangeProgress(waterLevel, 35, 80);
   const airQualityBand = rangeProgress(airQuality, 50, 100);
-  const noiseBand = rangeProgress(noiseLevel, 20, 55);
+  const noiseBand = rangeProgress(microphoneNoiseLevel, 20, 55);
   const motionBand =
     motionDetected === null
       ? { progress: 0, state: "warn" as const, text: "--", ideal: "low disturbance" }
@@ -1065,14 +1058,6 @@ function SanctuaryPanel({
           state={temperatureBand.state}
         />
         <SanctuaryBand
-          label="Water Level"
-          current={waterBand.text}
-          ideal="35 - 80"
-          unit="%"
-          progress={waterBand.progress}
-          state={waterBand.state}
-        />
-        <SanctuaryBand
           label="pH"
           current={phBand.text}
           ideal="6.5 - 8.0"
@@ -1089,7 +1074,7 @@ function SanctuaryPanel({
           state={airQualityBand.state}
         />
         <SanctuaryBand
-          label="Noise"
+          label="Microphone Noise"
           current={noiseBand.text}
           ideal="20 - 55"
           unit="dB"
@@ -1142,10 +1127,11 @@ export default function Dashboard() {
   const [history, setHistory] = useState<SensorHistoryPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const [microphoneNoiseLevel, setMicrophoneNoiseLevel] = useState(0);
   const [selectedMetrics, setSelectedMetrics] = useState<SensorMetricKey[]>([
     "temperature",
     "humidity",
-    "water_level",
+    "rain_sensor",
   ]);
 
   const toggleMetricSelection = (key: SensorMetricKey) => {
@@ -1166,6 +1152,97 @@ export default function Dashboard() {
     return () => window.clearInterval(timer);
   }, []);
 
+  // Microphone noise capture using time-domain analysis
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    let processor: ScriptProcessorNode | null = null;
+    let audioContext: AudioContext | null = null;
+
+    const initMicrophone = async () => {
+      try {
+        console.log("🎤 Starting microphone initialization...");
+        
+        // Request microphone access
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+        });
+
+        console.log("✅ Microphone access granted, stream active");
+
+        // Create audio context
+        // Create audio context with proper type handling
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        audioContext = new AudioContextClass() as AudioContext;
+
+        // Resume if suspended
+        if (audioContext.state === "suspended") {
+          console.log("Resuming audio context...");
+          await audioContext.resume();
+        }
+
+        // Create source - use proper method call
+        const source = audioContext.createMediaStreamSource(stream);
+
+        // Create script processor for real-time analysis
+        processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        processor.onaudioprocess = (event) => {
+          const inputData = event.inputBuffer.getChannelData(0);
+
+          // Calculate RMS (Root Mean Square) from time-domain data
+          let sum = 0;
+          for (let i = 0; i < inputData.length; i++) {
+            sum += inputData[i] * inputData[i];
+          }
+          const rms = Math.sqrt(sum / inputData.length);
+
+          // Scale to 0-100 dB range with aggressive scaling
+          const normalizedValue = Math.min(100, rms * 2000);
+
+          setMicrophoneNoiseLevel(Number(normalizedValue.toFixed(1)));
+
+          // Log for debugging
+          console.log(
+            `🔊 RMS: ${(rms * 1000).toFixed(2)}, Noise dB: ${normalizedValue.toFixed(1)}`,
+          );
+        };
+
+        console.log("📊 Audio processor connected and listening...");
+      } catch (err: any) {
+        console.error("❌ Microphone Error:", err.name, err.message);
+        if (err.name === "NotAllowedError") {
+          console.error("User denied microphone permission");
+        } else if (err.name === "NotFoundError") {
+          console.error("No microphone device found");
+        }
+        setMicrophoneNoiseLevel(0);
+      }
+    };
+
+    initMicrophone();
+
+    // Cleanup
+    return () => {
+      console.log("🛑 Cleaning up microphone...");
+      if (processor) {
+        processor.disconnect();
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      if (audioContext) {
+        audioContext.close();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const supabaseClient = supabase;
 
@@ -1179,7 +1256,7 @@ export default function Dashboard() {
       const { data, error: loadError } = await supabaseClient
         .from("device_state")
         .select(
-          "id, device_id, temperature, humidity, water_level, ph, air_quality, noise_level, motion_detected, updated_at",
+          "id, device_id, temperature, humidity, rain_sensor, ph, air_quality, motion_detected, updated_at",
         )
         .eq("device_id", deviceId)
         .maybeSingle();
@@ -1274,15 +1351,15 @@ export default function Dashboard() {
         fullTime: fullDateTime.format(date),
         temperature: Number(point.temperature.toFixed(1)),
         humidity: Number(point.humidity.toFixed(1)),
-        water_level: Number(point.water_level.toFixed(1)),
+        rain_sensor: Number(point.rain_sensor.toFixed(1)),
         ph: Number(point.ph.toFixed(2)),
         air_quality: Number(point.air_quality.toFixed(0)),
-        noise_level: Number(point.noise_level.toFixed(1)),
+        noise_level: microphoneNoiseLevel,
         motion_detected: point.motion_detected,
         motion_score: point.motion_detected ? 100 : 0,
         temperature_trend: 0,
         humidity_trend: 0,
-        water_level_trend: 0,
+        rain_sensor_trend: 0,
         ph_trend: 0,
         air_quality_trend: 0,
         noise_level_trend: 0,
@@ -1292,7 +1369,7 @@ export default function Dashboard() {
 
     const normalizeByKey = (
       data: ChartPoint[],
-      key: "temperature" | "humidity" | "water_level" | "ph" | "air_quality" | "noise_level",
+      key: "temperature" | "humidity" | "rain_sensor" | "ph" | "air_quality" | "noise_level",
     ) => {
       if (!data.length) {
         return () => 0;
@@ -1312,7 +1389,7 @@ export default function Dashboard() {
 
     const normalizeTemperature = normalizeByKey(baseData, "temperature");
     const normalizeHumidity = normalizeByKey(baseData, "humidity");
-    const normalizeWater = normalizeByKey(baseData, "water_level");
+    const normalizeRain = normalizeByKey(baseData, "rain_sensor");
     const normalizePh = normalizeByKey(baseData, "ph");
     const normalizeAirQuality = normalizeByKey(baseData, "air_quality");
     const normalizeNoise = normalizeByKey(baseData, "noise_level");
@@ -1321,13 +1398,13 @@ export default function Dashboard() {
       ...item,
       temperature_trend: normalizeTemperature(item.temperature),
       humidity_trend: normalizeHumidity(item.humidity),
-      water_level_trend: normalizeWater(item.water_level),
+      rain_sensor_trend: normalizeRain(item.rain_sensor),
       ph_trend: normalizePh(item.ph),
       air_quality_trend: normalizeAirQuality(item.air_quality),
       noise_level_trend: normalizeNoise(item.noise_level),
       motion_trend: item.motion_score,
     }));
-  }, [history]);
+  }, [history, microphoneNoiseLevel]);
 
   const recentReadings = useMemo(() => {
     return chartData.slice(-10).reverse();
@@ -1344,10 +1421,10 @@ export default function Dashboard() {
             offlineThresholdSeconds={offlineThresholdSeconds}
             temperature={formatValue(deviceState?.temperature ?? null, " C")}
             humidity={formatValue(deviceState?.humidity ?? null, " %")}
-            waterLevel={formatValue(deviceState?.water_level ?? null, " %")}
+            rainSensor={formatValue(deviceState?.rain_sensor ?? null, " mm")}
             ph={formatValue(deviceState?.ph ?? null, "")}
             airQuality={formatValue(deviceState?.air_quality ?? null, " AQI")}
-            noiseLevel={formatValue(deviceState?.noise_level ?? null, " dB")}
+            microphoneNoiseLevel={formatValue(microphoneNoiseLevel, " dB")}
             motionDetected={deviceState?.motion_detected ?? null}
           />
 
@@ -1381,11 +1458,11 @@ export default function Dashboard() {
                 delay="0.18s"
               />
               <ChartPanel
-                title="Water Level (24h)"
+                title="Rain Sensor (24h)"
                 subtitle="Realtime and historical"
-                unit="%"
+                unit="mm"
                 data={chartData}
-                dataKey="water_level"
+                dataKey="rain_sensor"
                 stroke="#60a5fa"
                 domain={[0, 100]}
                 delay="0.26s"
@@ -1410,9 +1487,9 @@ export default function Dashboard() {
                 delay="0.34s"
               />
               <ChartPanel
-                title="Noise Level (24h)"
-                subtitle="Realtime and historical"
-                unit="DB"
+                title="Microphone Noise (24h)"
+                subtitle="Realtime audio from device microphone"
+                unit="dB"
                 data={chartData}
                 dataKey="noise_level"
                 stroke="#c4b5fd"
@@ -1461,9 +1538,9 @@ export default function Dashboard() {
                 temperature={deviceState?.temperature ?? null}
                 humidity={deviceState?.humidity ?? null}
                 ph={deviceState?.ph ?? null}
-                waterLevel={deviceState?.water_level ?? null}
+                rainSensor={deviceState?.rain_sensor ?? null}
                 airQuality={deviceState?.air_quality ?? null}
-                noiseLevel={deviceState?.noise_level ?? null}
+                microphoneNoiseLevel={microphoneNoiseLevel}
                 motionDetected={deviceState?.motion_detected ?? null}
               />
               <ArchitectureShowcase />
@@ -1494,10 +1571,10 @@ export default function Dashboard() {
                       <th className="py-3 pr-4 font-medium">Time</th>
                       <th className="py-3 pr-4 font-medium">Temperature</th>
                       <th className="py-3 pr-4 font-medium">Humidity</th>
-                      <th className="py-3 pr-4 font-medium">Water</th>
+                      <th className="py-3 pr-4 font-medium">Rain Sensor</th>
                       <th className="py-3 pr-4 font-medium">pH</th>
                       <th className="py-3 pr-4 font-medium">Air Quality</th>
-                      <th className="py-3 pr-4 font-medium">Noise</th>
+                      <th className="py-3 pr-4 font-medium">Microphone Noise</th>
                       <th className="py-3 pr-4 font-medium">Motion</th>
                     </tr>
                   </thead>
@@ -1507,7 +1584,7 @@ export default function Dashboard() {
                         <td className="py-3 pr-4">{reading.time}</td>
                         <td className="py-3 pr-4">{reading.temperature.toFixed(1)} C</td>
                         <td className="py-3 pr-4">{reading.humidity.toFixed(1)} %</td>
-                        <td className="py-3 pr-4">{reading.water_level.toFixed(1)} %</td>
+                        <td className="py-3 pr-4">{reading.rain_sensor.toFixed(1)} mm</td>
                         <td className="py-3 pr-4">{reading.ph.toFixed(2)}</td>
                         <td className="py-3 pr-4">{reading.air_quality.toFixed(0)} AQI</td>
                         <td className="py-3 pr-4">{reading.noise_level.toFixed(1)} dB</td>

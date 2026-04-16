@@ -58,12 +58,13 @@ Columns:
 - `device_id` unique device identifier
 - `temperature` latest temperature
 - `humidity` latest humidity
-- `water_level` latest water level percentage
+- `rain_sensor` rain detection status (always 0)
 - `ph` latest water pH value
 - `air_quality` latest air quality index
-- `noise_level` latest noise level in dB
 - `motion_detected` latest motion status
 - `updated_at` last mutation timestamp
+
+**Note:** Noise level is captured from the laptop microphone in real-time and is not stored in Supabase.
 
 Realtime should be enabled for the `device_state` table in Supabase.
 
@@ -81,10 +82,9 @@ curl -X POST "$SUPABASE_URL/rest/v1/device_state?on_conflict=device_id" \
 		"device_id": "esp32_01",
 		"temperature": 30,
 		"humidity": 70,
-		"water_level": 54,
+		"rain_sensor": 0,
 		"ph": 7.2,
 		"air_quality": 67,
-		"noise_level": 48,
 		"motion_detected": false
 	}'
 ```
@@ -112,10 +112,9 @@ Body:
 	"temperature": 29.5,
 	"humidity": 64,
 	"water_level": 61,
+	"rain_sensor": 0,
 	"ph": 7.0,
-	"air_quality": 58,
-	"noise_level": 46,
-	"motion_detected": true
+	"air_quality": 58: true
 }
 ```
 

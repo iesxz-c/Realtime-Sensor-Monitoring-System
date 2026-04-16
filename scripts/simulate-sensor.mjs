@@ -20,10 +20,9 @@ function buildPayload() {
     device_id: deviceId,
     temperature: Number((24 + Math.random() * 8).toFixed(1)),
     humidity: Number((50 + Math.random() * 25).toFixed(1)),
-    water_level: Number((35 + Math.random() * 45).toFixed(1)),
+    rain_sensor: 0,
     ph: Number((6.2 + Math.random() * 1.4).toFixed(2)),
     air_quality: Math.floor(45 + Math.random() * 55),
-    noise_level: Number((35 + Math.random() * 35).toFixed(1)),
     motion_detected: Math.random() > 0.75,
   };
 }
