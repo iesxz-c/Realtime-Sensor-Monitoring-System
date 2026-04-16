@@ -15,14 +15,31 @@ if (!baseUrl || !apiKey) {
 
 const endpoint = `${baseUrl}/rest/v1/device_state?on_conflict=device_id`;
 
+let currentTemperature = 28.4;
+let currentHumidity = 66.0;
+let currentPh = 7.1;
+let currentAirQuality = 62;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function buildPayload() {
+  // Gentle random walk to avoid sharp jumps between consecutive readings.
+  currentTemperature = clamp(currentTemperature + (Math.random() - 0.5) * 0.5, 27.0, 30.5);
+  currentHumidity = clamp(currentHumidity + (Math.random() - 0.5) * 1.6, 60.0, 72.0);
+  currentPh = clamp(currentPh + (Math.random() - 0.5) * 0.08, 6.8, 7.4);
+  currentAirQuality = Math.round(
+    clamp(currentAirQuality + (Math.random() - 0.5) * 4, 52, 78),
+  );
+
   return {
     device_id: deviceId,
-    temperature: Number((24 + Math.random() * 8).toFixed(1)),
-    humidity: Number((50 + Math.random() * 25).toFixed(1)),
+    temperature: Number(currentTemperature.toFixed(1)),
+    humidity: Number(currentHumidity.toFixed(1)),
     rain_sensor: 0,
-    ph: Number((6.2 + Math.random() * 1.4).toFixed(2)),
-    air_quality: Math.floor(45 + Math.random() * 55),
+    ph: Number(currentPh.toFixed(2)),
+    air_quality: currentAirQuality,
     motion_detected: Math.random() > 0.75,
   };
 }
