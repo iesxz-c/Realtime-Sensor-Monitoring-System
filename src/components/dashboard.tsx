@@ -1502,8 +1502,14 @@ export default function Dashboard() {
   }, [noiseHistory]);
 
   const recentReadings = useMemo(() => {
-    return chartData.slice(-10).reverse();
-  }, [chartData]);
+    return chartData
+      .slice(-10)
+      .reverse()
+      .map((reading) => ({
+        ...reading,
+        noise_level: microphoneNoiseLevel,
+      }));
+  }, [chartData, microphoneNoiseLevel]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.12),transparent_28%),linear-gradient(160deg,#030712_0%,#010611_45%,#02050d_100%)] px-4 py-6 text-slate-100 md:px-8 md:py-10">
