@@ -176,6 +176,7 @@ type ChartPoint = {
   noise_level: number;
   motion_detected: boolean;
   motion_score: number;
+  motion_activity: number;
   temperature_trend: number;
   humidity_trend: number;
   rain_sensor_trend: number;
@@ -618,14 +619,14 @@ function MotionPanel({ data, delay }: { data: ChartPoint[]; delay?: string }) {
               }}
             />
             <Line
-              type="stepAfter"
-              dataKey="motion_score"
+              type="monotone"
+              dataKey="motion_activity"
               stroke="#38bdf8"
-              strokeWidth={3}
+              strokeWidth={3.2}
               dot={false}
               isAnimationActive
-              animationDuration={850}
-              animationEasing="ease-out"
+              animationDuration={620}
+              animationEasing="ease-in-out"
               activeDot={{ r: 5, fill: "#38bdf8", stroke: "#0f172a", strokeWidth: 2 }}
               className="chart-line-flow"
             />
@@ -1390,6 +1391,7 @@ export default function Dashboard() {
         noise_level: 0,
         motion_detected: point.motion_detected,
         motion_score: point.motion_detected ? 100 : 0,
+        motion_activity: point.motion_detected ? 100 : 0,
         temperature_trend: 0,
         humidity_trend: 0,
         rain_sensor_trend: 0,
@@ -1439,6 +1441,23 @@ export default function Dashboard() {
     }));
   }, [history]);
 
+  const motionChartData = useMemo<ChartPoint[]>(() => {
+    if (!chartData.length) {
+      return [];
+    }
+
+    return chartData.map((item, index, items) => {
+      const start = Math.max(0, index - 2);
+      const window = items.slice(start, index + 1);
+      const average = window.reduce((sum, point) => sum + point.motion_score, 0) / window.length;
+
+      return {
+        ...item,
+        motion_activity: Number(average.toFixed(0)),
+      };
+    });
+  }, [chartData]);
+
   const noiseChartData = useMemo<ChartPoint[]>(() => {
     const shortTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
@@ -1470,6 +1489,7 @@ export default function Dashboard() {
         noise_level: point.noise,
         motion_detected: false,
         motion_score: 0,
+        motion_activity: 0,
         temperature_trend: 0,
         humidity_trend: 0,
         rain_sensor_trend: 0,
@@ -1572,7 +1592,7 @@ export default function Dashboard() {
                 delay="0.38s"
                 animated={false}
               />
-              <MotionPanel data={chartData} delay="0.4s" />
+              <MotionPanel data={motionChartData} delay="0.4s" />
             </div>
           </section>
 

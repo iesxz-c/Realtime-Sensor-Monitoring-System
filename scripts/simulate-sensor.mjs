@@ -15,8 +15,8 @@ if (!baseUrl || !apiKey) {
 
 const endpoint = `${baseUrl}/rest/v1/device_state?on_conflict=device_id`;
 
-let currentTemperature = 28.4;
-let currentHumidity = 66.0;
+let currentTemperature = 34.0;
+let currentHumidity = 71.0;
 let currentPh = 7.1;
 let currentAirQuality = 62;
 
@@ -25,9 +25,14 @@ function clamp(value, min, max) {
 }
 
 function buildPayload() {
-  // Gentle random walk to avoid sharp jumps between consecutive readings.
-  currentTemperature = clamp(currentTemperature + (Math.random() - 0.5) * 0.5, 27.0, 30.5);
-  currentHumidity = clamp(currentHumidity + (Math.random() - 0.5) * 1.6, 60.0, 72.0);
+  // Gentle random walk tuned for Chennai-like heat and humidity.
+  currentTemperature = clamp(currentTemperature + (Math.random() - 0.5) * 0.35, 33.0, 35.0);
+  const humidityTarget = 70 - (currentTemperature - 34) * 3;
+  currentHumidity = clamp(
+    currentHumidity * 0.72 + humidityTarget * 0.28 + (Math.random() - 0.5) * 0.8,
+    62.0,
+    82.0,
+  );
   currentPh = clamp(currentPh + (Math.random() - 0.5) * 0.08, 6.8, 7.4);
   currentAirQuality = Math.round(
     clamp(currentAirQuality + (Math.random() - 0.5) * 4, 52, 78),
