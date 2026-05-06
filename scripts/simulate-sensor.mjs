@@ -4,7 +4,7 @@ const baseUrl = process.env.SUPABASE_URL;
 const apiKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY;
 const deviceId = process.env.SIMULATOR_DEVICE_ID ?? "esp32_01";
-const intervalMs = Number(process.env.SIMULATOR_INTERVAL_MS ?? 3000);
+const intervalMs = Number(process.env.SIMULATOR_INTERVAL_MS ?? 5000);
 
 if (!baseUrl || !apiKey) {
   console.error(
