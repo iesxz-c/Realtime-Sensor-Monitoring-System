@@ -1,0 +1,17 @@
+services:
+  - type: worker
+    name: sensor-simulator
+    env: node
+    buildCommand: npm install
+    startCommand: npm run simulate
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SIMULATOR_DEVICE_ID
+        value: "esp32_01"
+      - key: SIMULATOR_INTERVAL_MS
+        value: "5000"
