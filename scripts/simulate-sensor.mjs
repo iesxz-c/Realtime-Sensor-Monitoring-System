@@ -77,3 +77,13 @@ setInterval(() => {
     console.error(error.message);
   });
 }, intervalMs);
+
+// Dummy web server to satisfy Render's FREE Web Service requirements
+import http from "http";
+const port = process.env.PORT || 10000;
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Simulator is running\\n");
+}).listen(port, () => {
+  console.log(`Dummy web server listening on port ${port} to keep the free tier happy!`);
+});

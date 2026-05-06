@@ -1,5 +1,5 @@
 services:
-  - type: worker
+  - type: web
     name: sensor-simulator
     env: node
     buildCommand: npm install
