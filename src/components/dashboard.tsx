@@ -206,19 +206,19 @@ const sensorMetricOptions: Array<{
   unit: string;
   chartType?: "monotone" | "stepAfter";
 }> = [
-  { key: "temperature", label: "Temperature", stroke: "#fb7185", unit: "C" },
-  { key: "humidity", label: "Humidity", stroke: "#22d3ee", unit: "%" },
-  { key: "rain_sensor", label: "Rain Sensor", stroke: "#3b82f6", unit: "mm" },
-  { key: "ph", label: "pH", stroke: "#4ade80", unit: "pH" },
-  { key: "air_quality", label: "Air Quality", stroke: "#fcd34d", unit: "AQI" },
-  {
-    key: "motion_score",
-    label: "Motion",
-    stroke: "#7dd3fc",
-    unit: "state",
-    chartType: "stepAfter",
-  },
-];
+    { key: "temperature", label: "Temperature", stroke: "#fb7185", unit: "C" },
+    { key: "humidity", label: "Humidity", stroke: "#22d3ee", unit: "%" },
+    { key: "rain_sensor", label: "Rain Sensor", stroke: "#3b82f6", unit: "mm" },
+    { key: "ph", label: "pH", stroke: "#4ade80", unit: "pH" },
+    { key: "air_quality", label: "Air Quality", stroke: "#fcd34d", unit: "AQI" },
+    {
+      key: "motion_score",
+      label: "Motion",
+      stroke: "#7dd3fc",
+      unit: "state",
+      chartType: "stepAfter",
+    },
+  ];
 
 function HeroMetric({
   label,
@@ -490,13 +490,13 @@ function ChartPanel({
   unit: string;
   data: ChartPoint[];
   dataKey:
-    | "temperature"
-    | "humidity"
-    | "rain_sensor"
-    | "ph"
-    | "air_quality"
-    | "noise_level"
-    | "motion_score";
+  | "temperature"
+  | "humidity"
+  | "rain_sensor"
+  | "ph"
+  | "air_quality"
+  | "noise_level"
+  | "motion_score";
   stroke: string;
   domain?: [number, number];
   delay?: string;
@@ -674,11 +674,10 @@ function SelectableMultiPlot({
               key={option.key}
               type="button"
               onClick={() => onToggleMetric(option.key)}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                active
+              className={`rounded-full border px-4 py-2 text-sm transition ${active
                   ? "border-transparent text-slate-950 shadow-[0_0_30px_rgba(125,211,252,0.16)]"
                   : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10"
-              }`}
+                }`}
               style={active ? { backgroundColor: option.stroke } : undefined}
             >
               {option.label}
@@ -768,14 +767,14 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
     stroke: string;
     type: "monotone" | "stepAfter";
   }> = [
-    { key: "temperature_trend", label: "Temperature", stroke: "#fb7185", type: "monotone" as const },
-    { key: "humidity_trend", label: "Humidity", stroke: "#22d3ee", type: "monotone" as const },
-    { key: "rain_sensor_trend", label: "Rain Sensor", stroke: "#60a5fa", type: "monotone" as const },
-    { key: "ph_trend", label: "pH", stroke: "#4ade80", type: "monotone" as const },
-    { key: "air_quality_trend", label: "Air Quality", stroke: "#fcd34d", type: "monotone" as const },
-    { key: "noise_level_trend", label: "Microphone Noise", stroke: "#c4b5fd", type: "monotone" as const },
-    { key: "motion_trend", label: "Motion", stroke: "#7dd3fc", type: "stepAfter" as const },
-  ];
+      { key: "temperature_trend", label: "Temperature", stroke: "#fb7185", type: "monotone" as const },
+      { key: "humidity_trend", label: "Humidity", stroke: "#22d3ee", type: "monotone" as const },
+      { key: "rain_sensor_trend", label: "Rain Sensor", stroke: "#60a5fa", type: "monotone" as const },
+      { key: "ph_trend", label: "pH", stroke: "#4ade80", type: "monotone" as const },
+      { key: "air_quality_trend", label: "Air Quality", stroke: "#fcd34d", type: "monotone" as const },
+      { key: "noise_level_trend", label: "Microphone Noise", stroke: "#c4b5fd", type: "monotone" as const },
+      { key: "motion_trend", label: "Motion", stroke: "#7dd3fc", type: "stepAfter" as const },
+    ];
 
   const climateSeries = trendSeries.filter((series) =>
     ["temperature_trend", "humidity_trend", "rain_sensor_trend", "ph_trend"].includes(series.key),
@@ -916,11 +915,10 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
                 onMouseLeave={() => setFocusedMetric(null)}
                 onFocus={() => setFocusedMetric(series.key)}
                 onBlur={() => setFocusedMetric(null)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
-                  active
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${active
                     ? "border-white/15 bg-white/6 text-slate-100"
                     : "border-white/8 bg-transparent text-slate-500"
-                }`}
+                  }`}
               >
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: series.stroke }} />
                 {series.label}
@@ -939,7 +937,7 @@ function MultiSeriesPanel({ data }: { data: ChartPoint[] }) {
         })}
         {renderBand({
           title: "Disturbance and light/activity",
-              subtitle: "Air quality, noise, and motion pulses",
+          subtitle: "Air quality, noise, and motion pulses",
           series: disturbanceSeries,
           minHeight: 340,
         })}
@@ -972,9 +970,8 @@ function SanctuaryBand({
           <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-400">ideal {ideal} {unit}</p>
         </div>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-            state === "good" ? "bg-emerald-300/20 text-emerald-200" : "bg-amber-300/20 text-amber-200"
-          }`}
+          className={`rounded-full px-2.5 py-1 text-xs font-medium ${state === "good" ? "bg-emerald-300/20 text-emerald-200" : "bg-amber-300/20 text-amber-200"
+            }`}
         >
           {state === "good" ? "Optimal" : "Adjust"}
         </span>
@@ -1031,11 +1028,11 @@ function SanctuaryPanel({
     motionDetected === null
       ? { progress: 0, state: "warn" as const, text: "--", ideal: "low disturbance" }
       : {
-          progress: motionDetected ? 100 : 28,
-          state: motionDetected ? ("warn" as const) : ("good" as const),
-          text: motionDetected ? "Detected" : "Quiet",
-          ideal: "quiet habitat",
-        };
+        progress: motionDetected ? 100 : 28,
+        state: motionDetected ? ("warn" as const) : ("good" as const),
+        text: motionDetected ? "Detected" : "Quiet",
+        ideal: "quiet habitat",
+      };
 
   return (
     <article
@@ -1173,7 +1170,7 @@ export default function Dashboard() {
     const initMicrophone = async () => {
       try {
         console.log("🎤 Starting microphone initialization...");
-        
+
         // Request microphone access
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -1275,6 +1272,46 @@ export default function Dashboard() {
         audioContext.close();
       }
     };
+  }, []);
+
+  // Browser-based Simulator
+  useEffect(() => {
+    const supabaseClient = supabase;
+    if (!supabaseClient) return;
+
+    let currentTemperature = 34.0;
+    let currentHumidity = 71.0;
+    let currentPh = 7.1;
+    let currentAirQuality = 62;
+
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+    const intervalId = window.setInterval(async () => {
+      currentTemperature = clamp(currentTemperature + (Math.random() - 0.5) * 0.35, 33.0, 35.0);
+      const humidityTarget = 70 - (currentTemperature - 34) * 3;
+      currentHumidity = clamp(currentHumidity * 0.72 + humidityTarget * 0.28 + (Math.random() - 0.5) * 0.8, 62.0, 82.0);
+      currentPh = clamp(currentPh + (Math.random() - 0.5) * 0.08, 6.8, 7.4);
+      currentAirQuality = Math.round(clamp(currentAirQuality + (Math.random() - 0.5) * 4, 52, 78));
+
+      const payload = {
+        device_id: deviceId,
+        temperature: Number(currentTemperature.toFixed(1)),
+        humidity: Number(currentHumidity.toFixed(1)),
+        rain_sensor: 0,
+        ph: Number(currentPh.toFixed(2)),
+        air_quality: currentAirQuality,
+        motion_detected: Math.random() > 0.75,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        await supabaseClient.from("device_state").upsert(payload);
+      } catch (e) {
+        console.error("Browser simulator failed to upsert:", e);
+      }
+    }, 3000);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
