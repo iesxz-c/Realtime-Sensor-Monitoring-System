@@ -1142,6 +1142,8 @@ export default function Dashboard() {
     "humidity",
     "rain_sensor",
   ]);
+  const [simulatorRunning, setSimulatorRunning] = useState(false);
+  const [simulatorBusy, setSimulatorBusy] = useState(false);
 
   const toggleMetricSelection = (key: SensorMetricKey) => {
     setSelectedMetrics((current) => {
@@ -1501,6 +1503,48 @@ export default function Dashboard() {
     });
   }, [noiseHistory]);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch("/api/simulator/status");
+        const json = await res.json();
+        if (!mounted) return;
+        setSimulatorRunning(!!json?.running);
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    void fetchStatus();
+    const timer = setInterval(fetchStatus, 2500);
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const toggleSimulator = async () => {
+    if (simulatorBusy) return;
+    setSimulatorBusy(true);
+    try {
+      if (simulatorRunning) {
+        await fetch("/api/simulator/stop", { method: "POST" });
+      } else {
+        await fetch("/api/simulator/start", { method: "POST" });
+      }
+      // refresh quickly
+      const res = await fetch("/api/simulator/status");
+      const json = await res.json();
+      setSimulatorRunning(!!json?.running);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSimulatorBusy(false);
+    }
+  };
+
   const recentReadings = useMemo(() => {
     return chartData
       .slice(-10)
@@ -1528,6 +1572,22 @@ export default function Dashboard() {
             microphoneNoiseLevel={formatValue(microphoneNoiseLevel, " dB")}
             motionDetected={deviceState?.motion_detected ?? null}
           />
+
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleSimulator}
+              disabled={simulatorBusy}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition $
+                simulatorRunning
+                  ? "bg-rose-500 text-white hover:opacity-90"
+                  : "bg-emerald-400 text-slate-900 hover:opacity-90"
+              `}
+            >
+              {simulatorBusy ? "Working…" : simulatorRunning ? "Stop Simulator" : "Start Simulator"}
+            </button>
+            <p className="text-sm text-slate-300">Runs the local simulator script and streams to Supabase.</p>
+          </div>
 
           <section className="mt-8">
             <SectionIntro
